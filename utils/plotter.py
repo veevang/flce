@@ -31,7 +31,9 @@ class Plotter:
     # 出两张图，第一张是model performance plot
     # 第二张图是volume plot
     def plot_effective(self, num_parts, model, value_function, hue_order, datasets, title):
-        sns.set(font_scale=2)
+        # sns.set(font_scale=3.8)
+        # sns.set(font_scale=3.6)
+        sns.set(font_scale=3.4)
         sns.set_style(style)
         # lim_value_function_list = ["r2 score"]
         x_lo, x_hi = 0, 0.625
@@ -82,8 +84,10 @@ class Plotter:
         fig = sns.catplot(data=df,
                           # x='x',
                           x="removed client number",
-                          y='y', hue='method', kind='point', markers=markers,
-                          # scale=.7,
+                          y='y', hue='method', kind='point',
+                          markers=markers,
+                          facecolor='none',
+                          scale=1.5,
                           # errwidth=1,
                           # capsize=.5,
                           ci=None,
@@ -91,24 +95,41 @@ class Plotter:
                           col="dataset",
                           row="distribution",
                           # row="remove topic",
-                          sharey=False, dodge=True,
+                          sharey=False,
+                          dodge=True,
                           palette=colors,
                           col_order=["tictactoe", "adult", "bank", "dota2"],
                           aspect=1.2,
                           )
+
+        axes = fig.axes.flatten()
+
+        # Add a box or frame around the axis
+        for axis in axes:
+            axis.spines['top'].set_visible(True)
+            axis.spines['right'].set_visible(True)
+            axis.spines['bottom'].set_visible(True)
+            axis.spines['left'].set_visible(True)
+
         # 6 basic
-        # sns.move_legend(fig, "lower center", bbox_to_anchor=(.45, 1), ncol=7, title=None, frameon=True)
-        sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.05), ncol=10, title=None, frameon=True,
+        # sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.08), ncol=5, title=None, frameon=True,
+        #                 borderaxespad=0.)
+        # plt.legend(fontsize='14')
+        sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.1), ncol=5, title=None, frameon=True,
                         borderaxespad=0.)
+
+        # legend = plt.legend()
+        # for i in range(5):
+        #     legend.get_texts()[i].set_fontsize(14)
         # fig.yaxis.set_major_formatter('{:.2f}'.format)
-        fig.set_titles(row_template="{row_name}", col_template="{col_name}")
+        fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=10)
         # fmt = ticker.StrMethodFormatter("{x:.2f}")
         # for i, j in itertools.product(range(1), range(4)):
         #     fig.axes[i][j].yaxis.set_major_formatter(fmt)
         # fig.set(xlabel="removed ratio")
         fig.set(xlabel="removed clients")
         fig.set_ylabels(value_function)
-        plt.tight_layout(pad=0.2, w_pad=0.5)
+        plt.tight_layout(pad=0.25, w_pad=0.5)
         # if value_function in log_scale_value_function_list:
         #     fig.set(yscale="log")
         fig.savefig(f'{plot_path}{filename}')
@@ -209,20 +230,27 @@ class Plotter:
         # nrows = len(attack_method_li)
         # ncols = len(dataset_li)
         fig = sns.catplot(kind="box", data=ndf,
-                          y="method",
+                          # y="method",
+                          y="attack method",
                           x='contribution relative change',
-                          order=hue_order,
-                          row="attack method",
+                          hue="method",
+                          hue_order = ["Individual", "LeaveOneOut", "ShapleyValue", "StructuredMC-Shapley", "LeastCore","MC-LeastCore"],
+                          # order=hue_order,
+                          # row="attack method",
                           col="dataset",
                           # row="attack method",
                           col_order=["tictactoe", "adult", "bank", "dota2"],
-                          row_order=["data replication", "random data generation", "low quality data", "label flip", ],
+                          order=["data replication", "random data generation", "low quality data", "label flip", ],
+                          # order=hue_order,
                           # ci=95,
                           sharey=True,
                           # palette=colors,
                           palette=sns.color_palette("muted"),
-                          height=5,
-                          aspect=aspect,
+                          height=10,
+                          aspect=3/5,
+                          # width=2,
+                          # dodge=True,
+                          # legend=True,
                           # hue="method",
                           # hue_order=hue_order,
                           )
@@ -231,6 +259,9 @@ class Plotter:
         # axes = axes.flatten()
         # for axis in axes:
         #     axis.axhline(0, c='r', ls='--', lw=1)
+        new_labels = ['Repl.', 'Rand. Gen.', 'Low Qual.', 'Lbl. Flip']
+        fig.set_yticklabels(new_labels)
+
         fig.set_titles(row_template="{row_name}",
                        col_template="{col_name}",
                        )
@@ -239,6 +270,7 @@ class Plotter:
         fig.set(xlim=(cut_bottom * 1.1, cut_top * 1.1))
         # fig.set(xlabel=f"relative contribution change ({value_function})")
         fig.set(xlabel=f"relative contribution change")
+        # fig.set(xlabel=f"relative change")
         # fig.set(xticks=[-1, -0.5, 0, 0.5, 1])
         fig.set(xticks=[cut_bottom, 0, cut_top])
 
@@ -246,8 +278,8 @@ class Plotter:
         axes = fig.axes.flatten()
         for i in range(len(axes)):
             axes[i].axvline(0, c='r', ls='--', lw=1)
-
-        # sns.move_legend(fig, "lower center", bbox_to_anchor=(.45, 1), ncol=10, title=None, frameon=True)
+        sns.move_legend(fig, "upper center", bbox_to_anchor=(.5, 1.08), ncol=6, title=None, frameon=True)
+        plt.tight_layout(pad=0.2)
         fig.savefig(f'{plot_path}robust_{filename}')
         fig.figure.show()
         plt.close("all")
@@ -255,10 +287,10 @@ class Plotter:
 
     def plot_metric_robust(self, distribution, num_parts, model, attack_client, attack_arg):
         value_functions = ["accuracy", "data_quantity", "gradient_similarity", "robust_volume"]
-        sns.set(font_scale=2)
+        sns.set(font_scale=1.7)
         cut_top = 0.3
         cut_bottom = -0.3
-        aspect = 1.5
+        aspect = 5/3
         sns.set_style(style)
         con_data_path = f"{self.log_dir}metric_contribution.csv"
         if not os.path.exists(con_data_path):
@@ -267,13 +299,13 @@ class Plotter:
         plot_path = f"{self.plot_dir}robust/"
         if not os.path.exists(plot_path):
             os.makedirs(plot_path)
-        filename = f"{distribution}_{model}_metric.pdf"
+        filename = f"{distribution}_{model}_metric_1_0.3.pdf"
 
         # not attacked
         df = pd.read_csv(con_data_path, sep=';')
         # attacked
         adf = pd.read_csv(attacked_con_data_path, sep=';')
-        print(adf["value function"].unique())
+        # print(adf["value function"].unique())
 
         # print("df", df)
         # print("adf", adf)
@@ -294,7 +326,7 @@ class Plotter:
         # value_function = adf["value function"].unique()
         attack_method_li = adf["attack method"].unique()
         dataset_li = adf["dataset"].unique()
-        print(adf["value function"].unique())
+        # print(adf["value function"].unique())
         # print(seed_li, method_li, attack_method_li, dataset_li)
 
         ndf = pd.DataFrame(
@@ -350,21 +382,29 @@ class Plotter:
         # start plotting
         # nrows = len(attack_method_li)
         # ncols = len(dataset_li)
+
+        ndf['value function'] = ndf['value function'].map(
+            {"accuracy": "Accuracy", "data_quantity": "DataQuantity", "gradient_similarity": "CosineGradient",
+             "robust_volume": "RobustVolume"})
+        ndf['attack method'] = ndf['attack method'].map({"random data generation":"RG", "label flip": "LF"})
+
         fig = sns.catplot(kind="box", data=ndf,
-                          y="value function",
-                          x='contribution relative change',
-                          order=value_functions,
-                          row="attack method",
+                          x="attack method",
+                          y='contribution relative change',
+                          hue="value function",
+                          hue_order=["Accuracy", "DataQuantity", "CosineGradient", "RobustVolume"],
                           col="dataset",
-                          # row="attack method",
                           col_order=["tictactoe", "adult", "bank", "dota2"],
-                          row_order=["data replication", "random data generation", "low quality data", "label flip", ],
+                          # row_order=["data replication", "random data generation", "low quality data", "label flip", ],
+                          # row_order=["random data generation", "label flip", ],
                           # ci=95,
+                          order=['RG', 'LF'],
                           sharey=True,
                           # palette=colors,
                           palette=sns.color_palette("muted"),
-                          height=5,
-                          aspect=aspect,
+                          width=0.5,
+                          # height=10,
+                          aspect=0.5,
                           # hue="method",
                           # hue_order=hue_order,
                           )
@@ -378,16 +418,22 @@ class Plotter:
                        )
         # fig.set(xlabel="method")
         # fig.set(xscale="symlog")
-        fig.set(xlim=(cut_bottom * 1.1, cut_top * 1.1))
+        fig.set(ylim=(cut_bottom * 1.1, cut_top * 1.1))
+        fig.set(yticks=[cut_bottom, 0, cut_top])
         # fig.set(xlabel=f"relative contribution change ({value_function})")
-        fig.set(xlabel=f"relative contribution change")
-        # fig.set(xticks=[-1, -0.5, 0, 0.5, 1])
-        fig.set(xticks=[cut_bottom, 0, cut_top])
+        fig.set(ylabel=f"relative contribution change")
+        fig.set(xlabel="attack method")
 
+
+        # new_labels = ['Rand. Gen.', 'Flip Lbl.']
+        # fig.set_xticklabels(new_labels)
+
+        sns.move_legend(fig, "upper center", bbox_to_anchor=(.5, 1.15), ncol=6, title=None, frameon=True)
+        plt.tight_layout(pad=0.2)
         # reference line
         axes = fig.axes.flatten()
         for i in range(len(axes)):
-            axes[i].axvline(0, c='r', ls='--', lw=1)
+            axes[i].axhline(0, c='r', ls='--', lw=1)
 
         # sns.move_legend(fig, "lower center", bbox_to_anchor=(.45, 1), ncol=10, title=None, frameon=True)
         fig.savefig(f'{plot_path}robust_{filename}')
@@ -396,8 +442,8 @@ class Plotter:
         return
 
     def plot_metric_time(self):
-        sns.set(font_scale=2)
-        aspect = 1.1
+        sns.set(font_scale=2.6)
+        # aspect = 1.1
         sns.set_style(style)
         # sns.set(font='DejaVu Sans', font_scale=1.2)
         # sns.set_context(rc={"font.family": "serif", "font.serif": ["cmr10"]})
@@ -430,6 +476,7 @@ class Plotter:
         #     if full_name in config.method_abbr.keys():
         #         hue_order[i] = config.method_abbr[full_name]
 
+        df['value functions'] = df['value functions'].map({"['accuracy']":"Accuracy", "['data_quantity']":"DataQuantity", "['gradient_similarity']":"CosineGradient", "['robust_volume']":"RobustVolume"})
         # 改一下
         g = sns.catplot(data=df,
                         x="dataset",
@@ -437,12 +484,20 @@ class Plotter:
                         y='process time',
                         hue="value functions",
                         kind="bar",
-                        hue_order=["['accuracy']", "['data_quantity']", "['gradient_similarity']", "['robust_volume']"],
+                        # hue_order=["['accuracy']", "['data_quantity']", "['gradient_similarity']", "['robust_volume']"],
+                        hue_order=["Accuracy", "DataQuantity", "CosineGradient", "RobustVolume"],
                         sharey=False,
                         palette=colors,
                         # aspect=aspect,
                         # legend="lower center",
                         )
+
+        ax = g.facet_axis(0, 0)  # or ax = g.axes.flat[0]
+
+        # iterate through the axes containers
+        for c in ax.containers:
+            labels = [f'{(v.get_height()):.2E}' for v in c]
+            ax.bar_label(c, labels=labels, label_type='edge',size="7")
 
         # plt.legend(loc="lower center", bbox_to_anchor=(.3, 1.15), ncol=10, title=None, frameon=True)
         # sns.move_legend(g, "upper center", ncol=10, title=None, frameon=True, bbox_to_anchor=(.5, 0.8),
@@ -452,8 +507,10 @@ class Plotter:
         # g.set(ylabel="Process Time (s)")
         g.set(yscale="log")
         g.set_ylabels("Process Time (s)")
-        sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, 1.1), ncol=10, title=None, frameon=True,
+        sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, 1.25), ncol=2, title=None, frameon=True,
                         borderaxespad=0.)
+        # sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, 1.1), ncol=10, title=None, frameon=True,
+        #                 borderaxespad=0.)
         plt.tight_layout(pad=0.2)
         # sns.move_legend(g, "lower center", bbox_to_anchor=(.5, .9), ncol=7, title=None, frameon=True)
         # fig.set(ylabel="normalized process time")
@@ -467,8 +524,8 @@ class Plotter:
     # process time
     # 不管topic
     def plot_time(self, hue_order):
-        sns.set(font_scale=2)
-        aspect = 1.1
+        sns.set(font_scale=2.6)
+        # aspect = 1.1
         sns.set_style(style)
         # sns.set(font='DejaVu Sans', font_scale=1.2)
         # sns.set_context(rc={"font.family": "serif", "font.serif": ["cmr10"]})
@@ -524,7 +581,7 @@ class Plotter:
         g.set(ylabel="Process Time (s)")
         g.set(yscale="log")
         g.set_ylabels("Process Time (s)")
-        sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, 1.1), ncol=10, title=None, frameon=True, borderaxespad=0.)
+        sns.move_legend(g, "upper center", bbox_to_anchor=(0.5, 1.25), ncol=4, title=None, frameon=True, borderaxespad=0.)
         plt.tight_layout(pad=0.2)
         # sns.move_legend(g, "lower center", bbox_to_anchor=(.5, .9), ncol=7, title=None, frameon=True)
         # fig.set(ylabel="normalized process time")

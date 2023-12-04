@@ -89,14 +89,15 @@ Only one can be selected each time, and the others should be commented out.
 """
 
 # 6 basic schemes.
-effective_title = "6-basic"
-effective_hue_order = ["Individual", "LeaveOneOut",
-                       "MC-StructuredSampling-Shapley",
-                       "MC-LeastCore",
-                       "ShapleyValue",
-                       "LeastCore",
-                       "Random",
-                       ]
+# effective_title = "6-basic"
+# effective_hue_order = ["Individual",
+#                        "LeaveOneOut",
+#                        "MC-StructuredSampling-Shapley",
+#                        "MC-LeastCore",
+#                        "ShapleyValue",
+#                        "LeastCore",
+#                        "Random",
+#                        ]
 
 # shapley sampling-and-truncation optimization techniques.
 # effective_title = "sampling-and-truncation"
@@ -125,7 +126,6 @@ p = Plotter(start_date=start_date, num_try=num_try, is_final=is_final)
 # p.plot_time(time_hue_order)
 
 # plot metric time.
-# This plot is in the appendix.
 # p.plot_metric_time()
 
 # plot remove client best.
@@ -148,12 +148,11 @@ p = Plotter(start_date=start_date, num_try=num_try, is_final=is_final)
 #         )
 
 # plot metric robustness plot.
-# this plot is abandoned and the following can be neglected!
-# p.plot_metric_robust(
-#     distribution=attack_distribution,
-#     num_parts=config.num_parts,
-#     model="MLP",
-#     attack_client=attack_client,
-#     attack_arg=attack_arg,
-# )
+p.plot_metric_robust(
+    distribution=attack_distribution,
+    num_parts=config.num_parts,
+    model=model,
+    attack_client=attack_client,
+    attack_arg=attack_arg,
+)
 

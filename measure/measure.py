@@ -207,7 +207,7 @@ class Measure(ABC):
         batch_size = self.model.batch_size
 
         # ---- init the clients ----
-        client_models, client_optimizers, client_schedulers = [], [], []
+        client_models = []
         # server_model 定为 self.model
         self.model.load_state_dict(self.model.initial_state_dict)
 

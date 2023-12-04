@@ -186,17 +186,21 @@ for distribution, (dataset, model) in itertools.product(distributions, zip(datas
 
 # ------------------------- plot starts -----------------------
 
-sns.set(font_scale=2)
-sns.set_style(style)
+data['value function'] = data['value function'].map(
+    {"accuracy": "Accuracy", "data_quantity": "DataQuantity", "gradient_similarity": "CosineGradient",
+     "robust_volume": "RobustVolume"})
 
+sns.set(font_scale=3.8)
+sns.set_style(style)
 
 fig = sns.catplot(data=data,
                   x="removed client number",
                   y='y', hue='value function',
                   kind='point',
                   markers=markers,
+                  scale=1.5,
                   ci=None,
-                  hue_order=hue_order,
+                  hue_order=["Accuracy", "DataQuantity", "CosineGradient", "RobustVolume"],
                   col="dataset",
                   row="distribution",     # non-attack
                   # row="attack_method",      # attack
@@ -207,10 +211,18 @@ fig = sns.catplot(data=data,
                   col_order=datasets,
                   aspect=1.2,
                   )
+axes = fig.axes.flatten()
+for axis in axes:
+    axis.spines['top'].set_visible(True)
+    axis.spines['right'].set_visible(True)
+    axis.spines['bottom'].set_visible(True)
+    axis.spines['left'].set_visible(True)
 
-sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.1), ncol=10, title=None, frameon=True,
+# sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.2), ncol=4, title=None, frameon=True,
+#                 borderaxespad=0.)
+sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.12), ncol=4, title=None, frameon=True,
                 borderaxespad=0.)
-fig.set_titles(row_template="{row_name}", col_template="{col_name}")
+fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=10)
 fig.set(xlabel="removed clients")
 fig.set_ylabels("accuracy")
 plt.tight_layout(pad=0.2, w_pad=0.5)
