@@ -4,5 +4,5 @@
     <option name="executionMode" value="BINARY" />
     <option name="pathToExecutable" value="D:\anaconda3\Scripts\black.exe" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="pytorch" project-jdk-type="Python SDK" />
 </project>

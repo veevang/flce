@@ -10,8 +10,8 @@ num_local_epochs = 1
 dec_fac = 0.95
 
 # 8参与方，重复10次
-num_parts = 8
-num_samples = round(math.log(num_parts)) * (num_parts ** 2)
+# num_parts = 8
+# num_samples = round(math.log(num_parts)) * (num_parts ** 2)
 
 
 # num_repeat = 10
@@ -56,7 +56,7 @@ method_abbr = {"MC-StructuredSampling-Shapley": "StructuredMC-Shapley",
 #                                  # "diabetes": 2, "california housing": 1,
 #                                  "MNIST quantity skew": 1, "MNIST label skew": 1}
 
-num_rows_of_dataset = {"adult": None, "bank": None, "diabetes": None, "california housing": None, "MNIST": None, "dota2": None, "tictactoe": None}
+num_rows_of_dataset = {"adult": None, "bank": None, "diabetes": None, "california housing": None, "MNIST": None, "dota2": None, "tictactoe": None, "creditcard":None}
 # num_rows_of_dataset = {"adult": 1000, "bank": 10000, "diabetes": None, "california housing": 10000}
 # attack_method_list = ["data replication", "random data generation", "low quality data", "label flip"]
 

@@ -2,7 +2,6 @@ from measure.tmcsv import TMC_ShapleyValue
 import numpy as np
 
 
-# 写完了，应该没有bug
 class TMC_GuidedSampling_Shapley(TMC_ShapleyValue):
     name = 'TMC-GuidedSampling-Shapley'
 

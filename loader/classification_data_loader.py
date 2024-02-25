@@ -41,7 +41,7 @@ class Classification(DataLoader):
 
     # 恶意参与方：随机生成
     # 在一个参与方上生成一些随机数据
-    def randomly_generate_data(self, clients, num_rows: int, seed):
+    def randomly_generate_data(self, clients, ratio, seed):
         num_categorical_columns = sum(self.num_each_categorical_field())
         num_numerical_fields = len(self.X_numerical_fields)
 
@@ -49,6 +49,7 @@ class Classification(DataLoader):
         rng = np.random.default_rng(seed)
 
         for client in clients:
+            num_rows: int = round(ratio * len(self.y_train_parts[client]))
             X = np.zeros(shape=(num_rows, num_categorical_columns + num_numerical_fields))
             y = np.zeros(shape=num_rows)
 
@@ -369,7 +370,6 @@ class TicTacToe(Classification):
         return self.X_train, self.y_train, self.X_test, self.y_test
 
 
-# 哪些是categorical? 哪些是numerical?
 class Dota2(Classification):
     def __init__(self):
         super().__init__(name="Dota2")
@@ -462,12 +462,13 @@ class Dota2(Classification):
         return X, y
 
     # dota2的编码需要重写!
-    def randomly_generate_data(self, clients, num_rows: int, seed):
+    def randomly_generate_data(self, clients, ratio, seed):
         num_categorical_columns = sum(self.num_each_categorical_field())
         num_numerical_fields = len(self.X_numerical_fields)
         np.random.seed(seed)
 
         for client in clients:
+            num_rows: int = round(ratio * len(self.y_train_parts[client]))
             X = np.zeros(shape=(num_rows, num_categorical_columns + num_numerical_fields))
             y = np.zeros(shape=num_rows)
 
@@ -508,3 +509,58 @@ class Dota2(Classification):
             self.y_train_parts[client] = torch.cat([self.y_train_parts[client], y])
 
         return
+
+
+class UrlReputation(Classification):
+    """
+    We do not have the information about the attributes, thus we cannot simulate any adverse data on this dataset.
+    That is, the dataset is not suitable for robustness testing!!!
+    Not implemented!
+    """
+    pass
+
+
+class CreditCard(Classification):
+    """
+    We do not have the information about the attributes, thus we cannot simulate any adverse data on this dataset.
+    That is, the dataset is not suitable for robustness testing!!!
+    Not implemented!
+    """
+    def __init__(self):
+        super().__init__(name="CreditCard")
+        self.task = "Classification"
+        return
+
+    def read(self, test_ratio, shuffle_seed, cuda=False, nrows=None):
+        self.data = pd.read_csv('./data/creditcard_2023.csv',
+                                nrows=nrows)
+        self.data = sklearn.utils.shuffle(self.data, random_state=shuffle_seed)
+
+        # 预处理，处理未知值，将上一步得到的含NaN的行都删除
+        self.data.dropna(axis=0, how='any', inplace=True)
+
+        X_df = self.data.drop(['id', 'Class'], axis=1)
+        X = preprocessing.scale(X_df.to_numpy(float))
+
+        y_encoder = LabelEncoder()
+        y = y_encoder.fit_transform(self.data.Class)
+
+        np.random.seed(666)
+        shuffle_indices = np.arange(X.shape[0])
+        np.random.shuffle(shuffle_indices)
+        X = X[shuffle_indices]
+        y = y[shuffle_indices]
+
+        # 转变为tensor
+        X = torch.FloatTensor(X)
+        y = torch.LongTensor(y)
+
+        self.X = X
+        self.y = y
+
+        self.train_test_split(test_ratio=test_ratio, random_state=shuffle_seed)
+
+        if cuda:
+            self._data_to_cuda()
+
+        return self.X_train, self.y_train, self.X_test, self.y_test

@@ -63,6 +63,14 @@ def return_model(mode, seed, **kwargs):
         batch_size = kwargs.get("batch_size")
         model = TicTacToeMLP(seed=seed, lr=lr, num_epoch=num_epoch, device=device, hidden_layer_size=hidden_layer_size,
                              batch_size=batch_size)
+    elif mode == "CreditCardMLP":
+        lr = kwargs.get("lr")
+        num_epoch = kwargs.get("num_epoch")
+        device = kwargs.get("device")
+        hidden_layer_size = kwargs.get("hidden_layer_size")
+        batch_size = kwargs.get("batch_size")
+        model = CreditCardMLP(seed=seed, lr=lr, num_epoch=num_epoch, device=device, hidden_layer_size=hidden_layer_size,
+                             batch_size=batch_size)
     elif mode == 'logistic regression':
         tol = kwargs.get('tol', 1e-3)
         # scoring = kwargs.get('scoring')

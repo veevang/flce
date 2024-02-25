@@ -2,7 +2,7 @@ import os
 
 # 指定文件夹路径
 folder_paths = [
-    # "./data/utility_cache/--topic effective --dataset adult --model AdultMLP",
+    # "./data/utility_cache/--topic effective --dataset adult --model AdultMLP --num_parts 8",
     # "./data/utility_cache/--topic effective --dataset bank --model BankMLP",
     "./data/utility_cache/--topic robust --dataset adult --model AdultMLP",
     "./data/utility_cache/--topic robust --dataset bank --model BankMLP",

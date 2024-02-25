@@ -9,8 +9,6 @@ import itertools
 import math
 import time
 
-# 写完了，没查过，可能有bug
-
 class MC_StructuredSampling_Shapley(Measure):
     name = 'MC-StructuredSampling-Shapley'
     def __init__(self, loader, model, cache, value_functions):
@@ -34,6 +32,7 @@ class MC_StructuredSampling_Shapley(Measure):
 
         if num_samples is None:
             num_samples = round(min(2 ** self.num_parts, math.log(self.num_parts) * self.num_parts ** 2))
+        # 这一行应该要改，改成t = round(num_samples / (self.num_parts ** 2))
         t = round(num_samples / (self.num_parts ** 2) / 2)
         r = t * self.num_parts
 
@@ -42,13 +41,22 @@ class MC_StructuredSampling_Shapley(Measure):
         np.random.seed(seed)
 
         factorial = math.factorial(num_parts)
-        # Generate all possible orderings
-        all_orderings = np.array(list(itertools.permutations(range(num_parts))))
 
-        # Select r random orderings
-        selected_indices = np.random.choice([i for i in range(factorial)], size=r, replace=False)
+        # Generate all possible orderings! dangerous!!!!
+        # all_orderings = np.array(list(itertools.permutations(range(num_parts))))
 
-        selected_orderings = np.array([all_orderings[i] for i in selected_indices])
+        # Select r random orderings! dangerous!!!
+        # 第一版上交的8client的所有smc-shap都是使用这一行代码老版本的代码跑的，已经被替换了：
+        if num_parts == 8:
+            selected_indices = np.random.choice(factorial, size=r, replace=False)
+        elif num_parts == 14:
+            rng = np.random.default_rng(seed=seed)
+            selected_indices = rng.choice(factorial, size=r, replace=False)
+        else:
+            raise ValueError("Not 8 nor 14 clients!")
+
+        # selected_orderings = np.array([all_orderings[i] for i in selected_indices])
+        selected_orderings = np.array([self.find_permutation(num_parts, i) for i in selected_indices])
 
         divided_orderings = np.zeros([num_parts, t, num_parts])
         for j in range(num_parts):
@@ -103,3 +111,16 @@ class MC_StructuredSampling_Shapley(Measure):
         else:
             t_cal = time.process_time() - t0
         return self.contributions.tolist(), t_cal
+
+    # 历史遗留问题，应该删除！
+    # 是对的吗？？
+    def find_permutation(self, n, i):
+        elements = list(range(n))
+        permutation = []
+        fact = math.factorial(n)
+        for x in range(n, 0, -1):
+            fact = fact // x
+            index = i // fact
+            permutation.append(elements.pop(index))
+            i %= fact
+        return tuple(permutation)

@@ -423,6 +423,49 @@ class Dota2MLP(Net):
     def predict(self, X_test):
         return self._predict(X_test, batch_size=self.batch_size)
 
+
+class CreditCardMLP(Net):
+    def __init__(self, seed, lr, num_epoch, hidden_layer_size, device, batch_size):
+        super(CreditCardMLP, self).__init__(seed)
+        self.name = "CreditCardMLP"
+        input_size = 29
+        output_size = 1
+        self.lr = lr
+        self.num_epoch = num_epoch
+        self.batch_size = batch_size
+        self.hidden_layer_size = hidden_layer_size
+        self.fc1 = nn.Linear(input_size, hidden_layer_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_layer_size, output_size)
+        self.sigmoid = nn.Sigmoid()
+        self.initial_state_dict = copy.deepcopy(self.state_dict())
+
+        self.to(device)
+        self.device = device
+
+    def forward(self, x: torch.Tensor):
+        if type(x) == list:
+            x = x[0]
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        out = self.sigmoid(out)
+        return out
+
+    def fit_and_score(self, X_train, y_train, X_test, y_test, value_functions):
+        return self._fit_and_score(X_train, y_train, X_test, y_test, value_functions, num_epochs=self.num_epoch,
+                                   loss_fun=nn.BCELoss(), lr=self.lr, test_interval=1, batch_size=self.batch_size)
+
+    # num epoch:40, lr: 0.001, accu:0.854793793926535
+    def fit(self, X_train, y_train, incremental=False, num_epochs=None):
+        if num_epochs is None:
+            num_epochs = self.num_epoch
+        return self._fit(X_train, y_train, num_epochs=num_epochs, loss_fun=nn.BCELoss(), lr=self.lr,
+                         incremental=incremental, batch_size=self.batch_size)
+
+    def predict(self, X_test):
+        return self._predict(X_test, batch_size=self.batch_size)
+
 # torch.org
 # class CNNCIFAR10(Net):
 #     def __init__(self):

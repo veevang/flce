@@ -169,3 +169,4 @@ running_logs/*
 figs/*
 !figs/final/
 !figs/theory/
+.vscode/

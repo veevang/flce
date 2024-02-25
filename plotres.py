@@ -45,8 +45,9 @@ if not is_final:
         else:
             raise Exception("log file doesn't exist!")
 
-datasets = ["tictactoe", "adult", "bank", "dota2"]
-model_of_dataset = {"adult": "AdultMLP", "bank": "BankMLP", "dota2": "Dota2MLP", "tictactoe": "TicTacToeMLP"}
+datasets = ["tictactoe", "adult", "bank", "dota2", "creditcard"]
+# datasets = ["adult", "dota2"]
+model_of_dataset = {"adult": "AdultMLP", "bank": "BankMLP", "dota2": "Dota2MLP", "tictactoe": "TicTacToeMLP", "creditcard": "CreditCardMLP"}
 models = []
 for ds in datasets:
     if "MLP" in model_of_dataset[ds]:
@@ -58,8 +59,8 @@ for ds in datasets:
 models = list(set(models))
 
 attack_distribution = "label skew"
-attack_client = 0
-attack_arg = 0.3
+# attack_client = 0
+# attack_arg = 0.3
 
 # the following are configurations for robust and time plot.
 attack_hue_order = ["Individual",
@@ -70,6 +71,10 @@ attack_hue_order = ["Individual",
                     "MC-LeastCore",
                     # "Random",
                     ]
+
+# num_parts = 14
+num_parts = 8
+point_size_scale = 4
 
 time_hue_order = [
     # "MultiRounds",
@@ -89,6 +94,14 @@ Only one can be selected each time, and the others should be commented out.
 """
 
 # 6 basic schemes.
+# effective_title = "4-basic"
+# effective_hue_order = ["Individual",
+#                        "LeaveOneOut",
+#                        "MC-StructuredSampling-Shapley",
+#                        "MC-LeastCore",
+#                        "Random",
+#                        ]
+
 # effective_title = "6-basic"
 # effective_hue_order = ["Individual",
 #                        "LeaveOneOut",
@@ -123,7 +136,7 @@ Only one can be selected each time, and the others should be commented out.
 p = Plotter(start_date=start_date, num_try=num_try, is_final=is_final)
 
 # plot time.
-# p.plot_time(time_hue_order)
+p.plot_time(time_hue_order)
 
 # plot metric time.
 # p.plot_metric_time()
@@ -132,14 +145,17 @@ p = Plotter(start_date=start_date, num_try=num_try, is_final=is_final)
 # for model in models:
 #     # for vf in config.value_functions:
 #     for metric in metrics:
-#         p.plot_effective(num_parts=config.num_parts, model=model, value_function=metric, hue_order=effective_hue_order,datasets=datasets, title=effective_title)
+#         # p.plot_effective(num_parts=num_parts, model=model, value_function=metric, hue_order=effective_hue_order,
+#         #                  datasets=datasets, title=effective_title, point_size_scale=point_size_scale)
+#         p.plot_effective_all_num_parts(model=model, value_function=metric, hue_order=effective_hue_order,
+#                          datasets=datasets, title=effective_title, point_size_scale=point_size_scale)
 
 # plot robustness.
 # for model in models:
 #     for metric in metrics:
 #         p.plot_robust(
 #             distribution=attack_distribution,
-#             num_parts=config.num_parts,
+#             num_parts=num_parts,
 #             model=model,
 #             value_function=metric,
 #             hue_order=attack_hue_order,
@@ -147,12 +163,41 @@ p = Plotter(start_date=start_date, num_try=num_try, is_final=is_final)
 #             attack_arg=attack_arg,
 #         )
 
-# plot metric robustness plot.
-p.plot_metric_robust(
-    distribution=attack_distribution,
-    num_parts=config.num_parts,
-    model=model,
-    attack_client=attack_client,
-    attack_arg=attack_arg,
-)
 
+# plot supplementary robustness vs num attack clients
+# attack_client_coals = [{0}, {0, 1}, {0, 1, 2}]
+# for model in models:
+#     for metric in metrics:
+#         p.plot_robust_supplementary(
+#             distribution=attack_distribution,
+#             num_parts=num_parts,
+#             model=model,
+#             value_function=metric,
+#             hue_order=attack_hue_order,
+#             attack_client_coals=attack_client_coals,
+#             attack_arg=attack_arg,
+#             point_size_scale=2
+#         )
+
+# plot supplementary robustness vs attack arg
+# for model in models:
+#     for metric in metrics:
+#         p.plot_robust_attack_arg(
+#             distribution=attack_distribution,
+#             num_parts=num_parts,
+#             model=model,
+#             value_function=metric,
+#             hue_order=attack_hue_order,
+#             num_attack_client=0,
+#             attack_args=[0.1, 0.3, 0.5, 0.8],
+#             point_size_scale=2
+#         )
+
+# plot metric robustness plot.
+# p.plot_metric_robust(
+#     distribution=attack_distribution,
+#     num_parts=config.num_parts,
+#     model=model,
+#     attack_client=attack_client,
+#     attack_arg=attack_arg,
+# )

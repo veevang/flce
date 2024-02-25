@@ -18,16 +18,16 @@ def str_to_bool(string):
 def log_contributions(seed, contribution_list, method, distribution, dataset, model, value_function,
                       attack_method, logging_path):
     if attack_method is None:
-        l_con = Logger(logging_path, "contribution.csv")
+        l_con = Logger(logging_path, f"contribution_{num_parts}.csv")
     else:
-        l_con = Logger(logging_path, "attacked_contribution.csv")
+        l_con = Logger(logging_path, f"attacked_contribution_{num_attack_clients}_{attack_arg}.csv")
     d_con = dict()
     d_con["time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     d_con["dataset"] = dataset
     d_con["alpha"] = alpha
     d_con["distribution"] = distribution
     d_con["seed"] = seed
-    d_con["#parts"] = config.num_parts
+    d_con["#parts"] = num_parts
     d_con["model"] = model
     d_con["lr"] = lr
     d_con["num_epoch"] = num_epoch
@@ -52,7 +52,7 @@ def log_process_time(seed, method, process_time, distribution, dataset, logging_
     d_t["dataset"] = dataset
     d_t["distribution"] = distribution
     d_t["seed"] = seed
-    d_t["#parts"] = config.num_parts
+    d_t["#parts"] = num_parts
     d_t["model"] = model_name
     d_t["lr"] = lr
     d_t["num_epoch"] = num_epoch
@@ -67,13 +67,13 @@ def log_process_time(seed, method, process_time, distribution, dataset, logging_
 def log_remove_client(seed, distribution, dataset, method_name, x, y_remove_best, y_remove_worst, alpha, logging_path,
                       value_function, model_name, num_removed_client_best, num_removed_client_worst, attack_method,
                       attack_arg):
-    logger = Logger(logging_path, "remove_client_data.csv")
+    logger = Logger(logging_path, f"remove_client_data_{num_parts}.csv")
     dic = dict()
     dic["time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     dic["distribution"] = distribution
     dic["dataset"] = dataset
     dic["seed"] = seed
-    dic["#parts"] = config.num_parts
+    dic["#parts"] = num_parts
     dic["model"] = model_name
     dic["lr"] = lr
     dic["num_epoch"] = num_epoch
@@ -99,13 +99,16 @@ def log_remove_client(seed, distribution, dataset, method_name, x, y_remove_best
 
 
 def cache_path(seed):
-    folder = f"./data/utility_cache/--topic {args.topic} --dataset {dataset} --model {model_name}"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
     if topic == "effective":
-        return f"./data/utility_cache/--topic effective --dataset {dataset} --model {model_name}/--num_epoch {num_epoch} --lr {lr} --hidden_layer_size {hidden_layer_size} --batch_size {batch_size} --alpha {alpha} {distribution} --seed {seed} {value_functions}.pkl"
+        folder = f"./data/utility_cache/--topic effective --dataset {dataset} --model {model_name} --num_parts {num_parts}"
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        return f"{folder}/--num_epoch {num_epoch} --lr {lr} --hidden_layer_size {hidden_layer_size} --batch_size {batch_size} --alpha {alpha} {distribution} --seed {seed} {value_functions}.pkl"
     elif topic == "robust" or topic == "effective_in_robust_setting":
-        path = f"./data/utility_cache/--topic robust --dataset {dataset} --model {model_name}/--num_epoch {num_epoch} --lr {lr} --hidden_layer_size {hidden_layer_size} --batch_size {batch_size} --alpha {alpha} {distribution} --seed {seed} {attack} {num_attack_clients} --attack_arg {attack_arg} {value_functions}.pkl"
+        folder = f"./data/utility_cache/--topic robust --dataset {dataset} --model {model_name} --num_parts {num_parts}"
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        path = f"{folder}/--num_epoch {num_epoch} --lr {lr} --hidden_layer_size {hidden_layer_size} --batch_size {batch_size} --alpha {alpha} {distribution} --seed {seed} {attack} {num_attack_clients} --attack_arg {attack_arg} {value_functions}.pkl"
         return path
 
 
@@ -118,7 +121,7 @@ def score_clients(loader, model, seed, distribution, dataset, value_functions, c
     print(f"{method_instance.name} running...")
     instances.append(method_instance)
     con[method_instance.name], tm[method_instance.name] = method_instance.get_contributions(seed=seed,
-                                                                                            num_samples=config.num_samples,
+                                                                                            num_samples=num_samples,
                                                                                             decfac=config.dec_fac,
                                                                                             num_local_epochs=config.num_local_epochs,
                                                                                             )
@@ -145,7 +148,7 @@ def score_clients(loader, model, seed, distribution, dataset, value_functions, c
 
 
 def eval_remove_client(seed, distribution, dataset, logging_path, method, alpha, model_name):
-    loader = get_data(seed=seed, dataset=dataset, distribution=distribution, alpha=alpha)
+    loader = get_data(seed=seed, dataset=dataset, distribution=distribution, alpha=alpha, num_parts=num_parts)
 
     # model
     model = return_model(model_name, seed=seed, num_epoch=num_epoch, lr=lr, device=device,
@@ -179,7 +182,7 @@ def eval_ratios(seed, distribution, dataset, attack_method, logging_path, method
                 num_attack_clients):
     loader = get_attack_data(seed=seed, dataset=dataset, distribution=distribution,
                              attack_method=attack_method, alpha=alpha, attack_arg=attack_arg,
-                             num_attack_clients=num_attack_clients)
+                             num_attack_clients=num_attack_clients, num_parts=num_parts)
     model = return_model(model_name, seed=seed, num_epoch=num_epoch, lr=lr, device=device,
                          hidden_layer_size=hidden_layer_size, batch_size=batch_size)
 
@@ -203,7 +206,7 @@ def eval_remove_client_robust_setting(seed, distribution, dataset, attack_method
                                       attack_arg, model_name, num_attack_clients):
     loader = get_attack_data(seed=seed, dataset=dataset, distribution=distribution,
                              attack_method=attack_method, alpha=alpha, attack_arg=attack_arg,
-                             num_attack_clients=num_attack_clients)
+                             num_attack_clients=num_attack_clients, num_parts=num_parts)
     model = return_model(model_name, seed=seed, num_epoch=num_epoch, lr=lr, device=device,
                          hidden_layer_size=hidden_layer_size, batch_size=batch_size)
 
@@ -263,6 +266,7 @@ if __name__ == "__main__":
     parser.add_argument("--hidden_layer_size", type=int)
     parser.add_argument("--device", type=str)
     parser.add_argument("--batch_size", type=int)
+    parser.add_argument("--num_parts", type=int)
 
     # parser.add_argument("--run_robust", help="Whether to run robustness comparison", type=str_to_bool, required=False)
     # parser.add_argument("--rebuild", type=str_to_bool, required=False)
@@ -287,6 +291,9 @@ if __name__ == "__main__":
     hidden_layer_size = args.hidden_layer_size
     batch_size = args.batch_size
     num_attack_clients = args.num_attack_clients
+    num_parts = args.num_parts
+
+    num_samples = round(math.log(num_parts)) * (num_parts ** 2)
 
     if args.device == "cpu":
         device = torch.device("cpu")

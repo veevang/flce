@@ -21,13 +21,17 @@ def str_to_dataset(dataset):
         loader = Dota2()
     elif dataset == "tictactoe":
         loader = TicTacToe()
+    elif dataset == "urlrep":
+        loader = UrlReputation()
+    elif dataset == "creditcard":
+        loader = CreditCard()
     else:
         raise ValueError("dataset not exist!")
     return loader
 
 
-def get_data(seed, dataset, distribution, alpha):
-    loader = load_and_partition(seed, dataset, distribution, alpha)
+def get_data(seed, dataset, distribution, alpha, num_parts):
+    loader = load_and_partition(seed, dataset, distribution, alpha, num_parts)
     # with open(file_path, 'wb') as file:
     #     pickle.dump(loader, file)
     for y in loader.y_train_parts:
@@ -36,21 +40,21 @@ def get_data(seed, dataset, distribution, alpha):
     return loader
 
 
-def load_and_partition(seed, dataset, distribution, alpha):
+def load_and_partition(seed, dataset, distribution, alpha, num_parts):
     # first load data
     loader = str_to_dataset(dataset)
-    alpha_list = np.array([alpha for _ in range(config.num_parts)])
+    alpha_list = np.array([alpha for _ in range(num_parts)])
     loader.read(test_ratio=config.test_ratio, shuffle_seed=seed, nrows=config.num_rows_of_dataset[dataset])
 
     if distribution == "uniform":
-        loader.uniform_split(config.num_parts)
+        loader.uniform_split(num_parts)
     elif distribution == "quantity skew":
         ratios = scipy.stats.dirichlet.rvs(alpha_list, random_state=seed)
         ratios = np.concatenate(ratios)
         # print(ratios)
         loader.ratio_split(ratios)
     elif distribution == "label skew":
-        loader.non_iid_split(config.num_parts, alpha_list, random_state=seed)
+        loader.non_iid_split(num_parts, alpha_list, random_state=seed)
     # elif args.topic == "QualitySkew":
     #     loader.uniform_split(config.num_parts)
     #     flip_client = np.zeros(config.num_parts)
@@ -71,13 +75,13 @@ def load_and_partition(seed, dataset, distribution, alpha):
     return loader
 
 
-def get_attack_data(seed, dataset, distribution, attack_method, alpha, attack_arg, num_attack_clients):
-    loader = get_data(seed, dataset, distribution, alpha=alpha)
+def get_attack_data(seed, dataset, distribution, attack_method, alpha, attack_arg, num_attack_clients, num_parts):
+    loader = get_data(seed, dataset, distribution, alpha=alpha, num_parts=num_parts)
     attack_clients = set(range(num_attack_clients))
     if attack_method == "data replication":
         loader.data_copy(attack_clients, seed, attack_arg)
     elif attack_method == "random data generation":
-        loader.randomly_generate_data(attack_clients, round(attack_arg * len(loader.X_train_parts[0])), seed)
+        loader.randomly_generate_data(attack_clients, attack_arg, seed)
     elif attack_method == "low quality data":
         loader.low_quality_data(attack_clients, random_seed=seed, ratio=attack_arg)
     elif attack_method == "label flip":
