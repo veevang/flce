@@ -40,7 +40,7 @@ class MC_StructuredSampling_Shapley(Measure):
 
         np.random.seed(seed)
 
-        # todo: Avoid the calculation of factorial to obtain distinct random orderings.
+        # next time remember to avoid the calculation of factorial to obtain distinct random orderings.
         factorial = math.factorial(num_parts)
 
         rng = np.random.default_rng(seed=seed)
