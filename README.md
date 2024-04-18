@@ -25,22 +25,35 @@ The project stems from a paper to appear at VLDB'24 entitled "Contributions Esti
 Before you begin, ensure you have met the following requirements:
 - Python 3.9.7 or later
 
-### Installation
+[//]: # (### Installation)
 
-To perform FLCE, follow these steps:
+[//]: # ()
+[//]: # (To perform FLCE, follow these steps:)
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/veevang/flce
-   ```
-2. Navigate to the repository directory:
-   ```
-   cd flce
-   ```
-3. Install the required Python packages:????
-   ```
-   pip install -r requirements.txt
-   ```
+[//]: # ()
+[//]: # (1. Clone the repository:)
+
+[//]: # (   ```)
+
+[//]: # (   git clone https://github.com/veevang/flce)
+
+[//]: # (   ```)
+
+[//]: # (2. Navigate to the repository directory:)
+
+[//]: # (   ```)
+
+[//]: # (   cd flce)
+
+[//]: # (   ```)
+
+[//]: # (3. Install the required Python packages:????)
+
+[//]: # (   ```)
+
+[//]: # (   pip install -r requirements.txt)
+
+[//]: # (   ```)
 
 ### Usage
 
@@ -81,7 +94,8 @@ For more examples, please refer to the "./run.sh" file.
 ## Acknowledgments
 
 - Thank Prof. Guoliang Li, Dr. Yong Wang, and Dr. Kaiyu Li for their contributions to the development of this project.
-- In our implementation, we referred to the repository: https://github.com/AI-secure/Shapley-Study.???
+
+[//]: # (- In our implementation, we referred to the repository: https://github.com/AI-secure/Shapley-Study.???)
 
 [//]: # (- Thank funding???)
 
