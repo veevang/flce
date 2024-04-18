@@ -57,7 +57,7 @@ Before you begin, ensure you have met the following requirements:
 
 ### Usage
 
-To start using FLCE, you can run the main script with the following command:
+[//]: # (To start using FLCE, you can run the main script with the following command:)
 
 [//]: # (```shell)
 
@@ -65,7 +65,7 @@ To start using FLCE, you can run the main script with the following command:
 
 [//]: # (```)
 
-For more examples, please refer to the "./run.sh" file.
+For examples, please refer to the "./run.sh" file.
 
 [//]: # (## Contributing)
 
