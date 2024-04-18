@@ -1,10 +1,13 @@
-from datapre import *
-from model.model import *
+from script.datapre import *
 from utils.logger import Logger
 import datetime
 import argparse
 import config
-
+from module.method import *
+import math
+from module.model.model import return_model
+import os
+import pickle
 
 # cache里面是list
 def str_to_bool(string):
@@ -302,7 +305,7 @@ if __name__ == "__main__":
         torch.cuda.set_device(device)
 
     # 建立文件夹
-    log_path = f"./logs/{start_date}/{num_try}"
+    log_path = f"./result/exp_result/{start_date}/{num_try}"
 
     num_try = int(num_try)
     if topic == "effective" or topic == "efficient":

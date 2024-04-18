@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FLContributionEvaluation.iml" filepath="$PROJECT_DIR$/.idea/FLContributionEvaluation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/flce.iml" filepath="$PROJECT_DIR$/.idea/flce.iml" />
     </modules>
   </component>
 </project>

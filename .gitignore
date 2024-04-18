@@ -32,7 +32,7 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
+# Installer exp_result
 pip-log.txt
 pip-delete-this-directory.txt
 
@@ -161,12 +161,12 @@ cython_debug/
 
 data/utility_cache/
 
-logs/*
-!logs/final/
+result/exp_result/*
+!result/exp_result/final/
 
-running_logs/*
+result/log/*
 
-figs/*
-!figs/final/
-!figs/theory/
+figure/*
+!figure/exp_result/final/
+!figure/theory/
 .vscode/

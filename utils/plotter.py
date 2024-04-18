@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
-from config import config
+import config
 import itertools
 
 '''
@@ -24,11 +23,11 @@ class Plotter:
         # self.start_date = start_date
         # self.num_try = num_try
         if is_final:
-            self.log_dir = f"./logs/final/"
-            self.plot_dir = f"./figs/final/"
+            self.log_dir = f"./result/exp_result/final/"
+            self.plot_dir = f"./figure/exp_result/final/"
         else:
-            self.log_dir = f"./logs/{start_date}/{num_try}/"
-            self.plot_dir = f"./figs/{start_date}/{num_try}/"
+            self.log_dir = f"./result/exp_result/{start_date}/{num_try}/"
+            self.plot_dir = f"./figs/exp_results/{start_date}/{num_try}/"
         return
 
     # 同一个问题+data划分，不同数据集给一个图
@@ -42,7 +41,7 @@ class Plotter:
         # lim_value_function_list = ["r2 score"]
         x_lo, x_hi = 0, 0.625
         if num_parts == 8:
-            data_path = os.path.join(self.log_dir, "remove_client_data.csv")
+            data_path = os.path.join(self.log_dir, "remove_client_data_8&14.csv")
         elif num_parts == 14:
             data_path = os.path.join(self.log_dir, os.path.join("supplementary", "remove_client_data_14.csv"))
         else:
@@ -165,10 +164,11 @@ class Plotter:
         :param point_size_scale:
         :return:
         """
-        sns.set(font_scale=3.4)
+        # sns.set(font_scale=3.4)
+        sns.set(font_scale=3.3)
         sns.set_style(style)
         x_lo, x_hi = 0, 0.5
-        data_path = os.path.join(self.log_dir, os.path.join("supplementary", "remove_client_data_8&14.csv"))
+        data_path = os.path.join(self.log_dir, "remove_client_data_8&14.csv")
         df = pd.read_csv(data_path, sep=';')
 
         # The dataframe is "incorrectly" changed just to make it easier to draw with catplot,
@@ -270,7 +270,7 @@ class Plotter:
         # sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.08), ncol=5, title=None, frameon=True,
         #                 borderaxespad=0.)
         # plt.legend(fontsize='14')
-        sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.12), ncol=5, title=None, frameon=True,
+        sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.12), ncol=4, title=None, frameon=True,
                         borderaxespad=0.)
 
         # print(fig.legend.legendHandles)
@@ -283,13 +283,15 @@ class Plotter:
         # for i in range(5):
         #     legend.get_texts()[i].set_fontsize(14)
         # fig.yaxis.set_major_formatter('{:.2f}'.format)
-        fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=10)
+        title_pad: int = 13
+        fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=title_pad)
+        # fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=30)
 
         # change titles to the correct ones!!!
-        fig.axes[2, 0].set_title('quantity skew | 8 | creditcard')
-        fig.axes[2, 1].set_title('label skew | 8 | creditcard')
-        fig.axes[2, 2].set_title('quantity skew | 14 | dota2')
-        fig.axes[2, 3].set_title('label skew | 14 | dota2')
+        fig.axes[2, 0].set_title('quantity skew | 8 | creditcard', pad=title_pad)
+        fig.axes[2, 1].set_title('label skew | 8 | creditcard', pad=title_pad)
+        fig.axes[2, 2].set_title('quantity skew | 14 | dota2', pad=title_pad)
+        fig.axes[2, 3].set_title('label skew | 14 | dota2', pad=title_pad)
 
         # fmt = ticker.StrMethodFormatter("{x:.2f}")
         # for i, j in itertools.product(range(1), range(4)):
@@ -312,19 +314,19 @@ class Plotter:
         cut_bottom = -0.3
         aspect = 1.5
         sns.set_style(style)
-        con_data_path = f"{self.log_dir}contribution.csv"
+        con_data_path = f"{self.log_dir}contribution_8.csv"
         if not os.path.exists(con_data_path):
             raise Exception("Contributions are not generated! ")
-        attacked_con_data_path = f"{self.log_dir}attacked_contribution.csv"
+        attacked_con_data_path = f"{self.log_dir}attacked_contribution_1_0.3.csv"
         plot_path = f"{self.plot_dir}robust/"
         if not os.path.exists(plot_path):
             os.makedirs(plot_path)
         filename = f"{distribution}_{model}_{value_function}.pdf"
 
         # not attacked
-        df = pd.read_csv(con_data_path, sep=';')
+        df = pd.read_csv(con_data_path, sep=';',engine="python")
         # attacked
-        adf = pd.read_csv(attacked_con_data_path, sep=';')
+        adf = pd.read_csv(attacked_con_data_path, sep=';',engine="python")
 
         # print("df", df)
         # print("adf", adf)
@@ -428,6 +430,14 @@ class Plotter:
         # axes = axes.flatten()
         # for axis in axes:
         #     axis.axhline(0, c='r', ls='--', lw=1)
+
+        axes = fig.axes.flatten()
+        for axis in axes:
+            axis.spines['top'].set_visible(True)
+            axis.spines['right'].set_visible(True)
+            axis.spines['bottom'].set_visible(True)
+            axis.spines['left'].set_visible(True)
+
         new_labels = ['Repl.', 'Rand. Gen.', 'Low Qual.', 'Lbl. Flip']
         fig.set_yticklabels(new_labels)
 
@@ -454,7 +464,7 @@ class Plotter:
         plt.close("all")
         return
 
-    def plot_robust_supplementary(self, distribution, num_parts, model, value_function, hue_order, attack_client_coals,
+    def plot_robust_num_attack_clients(self, distribution, num_parts, model, value_function, hue_order, attack_client_coals,
                                   attack_arg, point_size_scale):
         sns.set(font_scale=3.5)
         cut_top = 0.3
@@ -591,6 +601,13 @@ class Plotter:
                           aspect=1.2,
                           )
         axes = fig.axes.flatten()
+
+        for axis in axes:
+            axis.spines['top'].set_visible(True)
+            axis.spines['right'].set_visible(True)
+            axis.spines['bottom'].set_visible(True)
+            axis.spines['left'].set_visible(True)
+
         for ax in axes:
             path_collections = [col for col in ax.collections if isinstance(col, matplotlib.collections.PathCollection)]
             for path_collection in path_collections:
@@ -618,7 +635,7 @@ class Plotter:
         # fig.set(xscale="symlog")
         # fig.set(xlim=(cut_bottom * 1.1, cut_top * 1.1))
         # fig.set(xlabel=f"relative contribution change ({value_function})")
-        fig.set(ylabel=f"RelConCh")
+        fig.set_ylabels("RelConCh")
         # fig.set(xlabel=f"relative change")
         # fig.set(xticks=[-1, -0.5, 0, 0.5, 1])
         # fig.set(xticks=[cut_bottom, 0, cut_top])
@@ -638,8 +655,8 @@ class Plotter:
                                   attack_args, point_size_scale):
         sns.set(font_scale=3.5)
         ###????!!!!!!!!!!!!!!!!!!!!
-        cut_top = 0.8
-        cut_bottom = -0.8
+        cut_top = max(attack_args)
+        cut_bottom = -cut_top
         aspect = 1.5
         num_attack_clients = 1
         sns.set_style(style)
@@ -647,10 +664,10 @@ class Plotter:
         if not os.path.exists(con_data_path):
             raise Exception("Contributions are not generated! ")
         attacked_con_data_paths = []
-        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_0.1.csv")
-        attacked_con_data_paths.append(f"{self.log_dir}attacked_contribution.csv")
-        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_0.5.csv")
-        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_0.8.csv")
+        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_{attack_args[0]}.csv")
+        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_{attack_args[1]}.csv")
+        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_{attack_args[2]}.csv")
+        attacked_con_data_paths.append(f"{self.log_dir}supplementary/attacked_contribution_1_{attack_args[3]}.csv")
         plot_path = f"{self.plot_dir}robust/"
         if not os.path.exists(plot_path):
             os.makedirs(plot_path)
@@ -776,6 +793,13 @@ class Plotter:
                           aspect=1.2,
                           )
         axes = fig.axes.flatten()
+
+        for axis in axes:
+            axis.spines['top'].set_visible(True)
+            axis.spines['right'].set_visible(True)
+            axis.spines['bottom'].set_visible(True)
+            axis.spines['left'].set_visible(True)
+
         for ax in axes:
             path_collections = [col for col in ax.collections if isinstance(col, matplotlib.collections.PathCollection)]
             for path_collection in path_collections:
@@ -804,7 +828,8 @@ class Plotter:
         # fig.set(xscale="symlog")
         # fig.set(xlim=(cut_bottom * 1.1, cut_top * 1.1))
         # fig.set(xlabel=f"relative contribution change ({value_function})")
-        fig.set(ylabel=f"RelConCh")
+        # fig.set(ylabel=f"RelConCh")
+        fig.set_ylabels("RelConCh")
         # fig.set(xlabel=f"relative change")
         # fig.set(xticks=[-1, -0.5, 0, 0.5, 1])
         # fig.set(xticks=[cut_bottom, 0, cut_top])
@@ -813,10 +838,10 @@ class Plotter:
         axes = fig.axes.flatten()
         for i in range(len(axes)):
             axes[i].axhline(0, c='r', ls='--', lw=1)
-        sns.move_legend(fig, "upper center", bbox_to_anchor=(.5, 1.4), ncol=4, title=None, frameon=True)
+        sns.move_legend(fig, "upper center", bbox_to_anchor=(.5, 1.4), ncol=3, title=None, frameon=True)
         plt.tight_layout(pad=0.2)
         fig.savefig(f'{plot_path}robustness_vs_attack_arg_{filename}')
-        fig.show()
+        fig.figure.show()
         plt.close("all")
         return
 
@@ -950,6 +975,15 @@ class Plotter:
         # axes = axes.flatten()
         # for axis in axes:
         #     axis.axhline(0, c='r', ls='--', lw=1)
+
+        axes = fig.axes.flatten()
+
+        for axis in axes:
+            axis.spines['top'].set_visible(True)
+            axis.spines['right'].set_visible(True)
+            axis.spines['bottom'].set_visible(True)
+            axis.spines['left'].set_visible(True)
+
         fig.set_titles(row_template="{row_name}",
                        col_template="{col_name}",
                        )
@@ -1002,8 +1036,9 @@ class Plotter:
         #     # 计算每个dataset的individual均值
         #     avg_indiv = np.average(df.loc[(df["dataset"] == ds) & (df["method"] == "individual"), "process time"])
         #     df.loc[df["dataset"] == ds, "process time"] /= avg_indiv
-        df = df[(df["method"] != "random")]
+        df = df[(df["method"] == "ShapleyValue")]
         df = df[(df['distribution'] == 'label skew')]
+        # df['process time'] = pd.to_numeric(df['column_name'], errors='raise')
 
         # for full_name in config.method_abbr.keys():
         #     df.loc[(df["method"] == full_name), "method"] = config.method_abbr[full_name]
@@ -1109,10 +1144,10 @@ class Plotter:
                         # legend="lower center",
                         )
         ### begin 2024-2-24
-        ax = g.facet_axis(0, 3)  # or ax = g.axes.flat[0]
-        for c in ax.containers:
-            labels = [f'{(v.get_height()):.2E}' for v in c]
-            ax.bar_label(c, labels=labels, label_type='edge', size="7")
+        # ax = g.facet_axis(0, 3)  # or ax = g.axes.flat[0]
+        # for c in ax.containers:
+        #     labels = [f'{(v.get_height()):.2E}' for v in c]
+        #     ax.bar_label(c, labels=labels, label_type='edge', size="7")
         ### end 2024-2-24
 
         # plt.legend(loc="lower center", bbox_to_anchor=(.3, 1.15), ncol=10, title=None, frameon=True)

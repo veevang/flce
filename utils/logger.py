@@ -4,7 +4,7 @@ import datetime
 
 class Logger:
     def __init__(self, path, filename):
-        # path = os.path.join('./logs/', path)
+        # path = os.path.join('./exp_result/', path)
         if not os.path.exists(path):
             os.makedirs(path)
         self.filepath = os.path.join(path, filename)
