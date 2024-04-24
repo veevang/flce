@@ -8,47 +8,86 @@
 from module.model.net import *
 import torch
 
+import torch
+import time
 
-def add_update_to_model(model, update, weight=1.0, device=None):
-    if not update:
-        return model
-    if device:
-        model = model.to(device)
-        update = [param.to(device) for param in update]
+# 确保CUDA可用
+if not torch.cuda.is_available():
+    raise SystemError("CUDA is not available. This demo requires a CUDA-capable device.")
 
-    for param_model, param_update in zip(model.parameters(), update):
-        param_model.data += weight * param_update.data
-    return model
+# 创建两个随机矩阵
+size = 1024
+a = torch.rand(size, size, device='cuda:1')
+b = torch.rand(size, size, device='cuda:1')
 
-def compute_grad_update(old_model, new_model, device=None):
-    # maybe later to implement on selected layers/parameters
-    if device:
-        old_model, new_model = old_model.to(device), new_model.to(device)
-    return [(new_param.data - old_param.data) for old_param, new_param in
-            zip(old_model.parameters(), new_model.parameters())]
+start_time = time.process_time()
 
-model1 = TicTacToeMLP(111, 0.001, 10, 1, torch.device("cpu"), 64)
-model2 = TicTacToeMLP(222, 0.001, 10, 1, torch.device("cpu"), 64)
-model3 = TicTacToeMLP(333, 0.001, 10, 1, torch.device("cpu"), 64)
+# 初始化CUDA事件
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+
+# 开始记录
+start_event.record()
+
+# 执行矩阵乘法
+c = torch.matmul(a, b)
+
+# 结束记录
+end_event.record()
+
+# 等待事件完成
+torch.cuda.synchronize()
+
+# 计算时间
+elapsed_time_ms = start_event.elapsed_time(end_event)
+cpu_process_time = time.process_time() - start_time
+
+print(f"Time to compute matrix multiplication: {elapsed_time_ms} ms")
+print(f"CPU process time: {cpu_process_time} s")
+
+print(f"Total time: {elapsed_time_ms * 1e-3 + cpu_process_time}")
 
 
-
-for param in model1.parameters():
-    print(param.data)
-
-for param in model2.parameters():
-    print(param.data)
-
-for param in model3.parameters():
-    print(param.data)
-
-print(compute_grad_update(model1, model2))
-update = compute_grad_update(model1, model2)
-
-add_update_to_model(model3, update, 0.5)
-
-for param in model3.parameters():
-    print(param.data)
+# def add_update_to_model(model, update, weight=1.0, device=None):
+#     if not update:
+#         return model
+#     if device:
+#         model = model.to(device)
+#         update = [param.to(device) for param in update]
+#
+#     for param_model, param_update in zip(model.parameters(), update):
+#         param_model.data += weight * param_update.data
+#     return model
+#
+# def compute_grad_update(old_model, new_model, device=None):
+#     # maybe later to implement on selected layers/parameters
+#     if device:
+#         old_model, new_model = old_model.to(device), new_model.to(device)
+#     return [(new_param.data - old_param.data) for old_param, new_param in
+#             zip(old_model.parameters(), new_model.parameters())]
+#
+# model1 = TicTacToeMLP(111, 0.001, 10, 1, torch.device("cpu"), 64)
+# model2 = TicTacToeMLP(222, 0.001, 10, 1, torch.device("cpu"), 64)
+# model3 = TicTacToeMLP(333, 0.001, 10, 1, torch.device("cpu"), 64)
+#
+#
+#
+# for param in model1.parameters():
+#     print(param.data)
+#
+# for param in model2.parameters():
+#     print(param.data)
+#
+# for param in model3.parameters():
+#     print(param.data)
+#
+# print(compute_grad_update(model1, model2))
+# update = compute_grad_update(model1, model2)
+#
+# add_update_to_model(model3, update, 0.5)
+#
+# for param in model3.parameters():
+#     print(param.data)
 
 
 

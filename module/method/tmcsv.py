@@ -88,19 +88,9 @@ class TMC_ShapleyValue(Measure):
         if "cuda" in str(device):
             end.record()
             torch.cuda.synchronize()
-            t_cal = (time.process_time() - t0) + start.elapsed_time(end)
+            t_cal = (time.process_time() - t0) + start.elapsed_time(end) * 1e-3
         else:
             t_cal = time.process_time() - t0
 
         return self.contributions.tolist(), t_cal
 
-    # def is_converged(self, contributions, previous_contributions, t):
-    #     # 需要思考一下这个收敛条件怎么设置，原文1000个参与方设为100
-    #     space_permutations = 100
-    #     if t < space_permutations or (previous_contributions[t-space_permutations] == 0).any():
-    #         return False
-    #     # 如果t>=space_permutations，就可以开始判断是否收敛了
-    #     else:
-    #         avg = np.average(np.array([abs(contributions[i] - previous_contributions[t - space_permutations][i]) / abs(contributions[i])
-    #                                    for i in range(len(contributions))]))
-    #         return avg < 0.05

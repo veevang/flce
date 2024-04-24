@@ -95,7 +95,7 @@ class LeastCore(Measure):
         if "cuda" in str(device):
             end.record()
             torch.cuda.synchronize()
-            t_cal = (time.process_time() - t0) + start.elapsed_time(end)
+            t_cal = (time.process_time() - t0) + start.elapsed_time(end) * 1e-3
         else:
             t_cal = time.process_time() - t0
 
