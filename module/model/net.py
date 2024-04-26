@@ -7,6 +7,7 @@ import torch
 from typing import Union
 import torch.utils.data
 from sklearn.metrics import accuracy_score, f1_score
+import time
 
 
 # https://blog.csdn.net/sxf1061700625/article/details/105870851?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522166763065216800180665746%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=166763065216800180665746&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-105870851-null-null.142^v63^pc_rank_34_queryrelevant25,201^v3^control_2,213^v1^control&utm_term=mnist&spm=1018.2226.3001.4187
@@ -80,7 +81,7 @@ class Net(nn.Module):
             models = [copy.deepcopy(backup_model) for _ in range(num_clients)]
             deltas = []
 
-            # client update
+            # -------  client update  -----------
             for i in range(num_clients):
                 # models[i] = copy.deepcopy(backup_model)
                 models[i] = self.client_update(X_train_parts[i], y_train_parts[i], models[i], num_local_rounds)
@@ -208,7 +209,6 @@ class Net(nn.Module):
                 optimizer.step()
 
                 running_loss += loss.item()
-            # print(running_loss)
         # 退出训练模式
         self.train(False)
         return

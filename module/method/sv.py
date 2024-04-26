@@ -40,12 +40,7 @@ class ShapleyValue(Measure):
     def get_contributions(self, **kwargs):
         device = self.model.device
         # start timing!
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        if "cuda" in str(device):
-            torch.cuda.synchronize()
-            start.record()
-        t0 = time.process_time()
+        t0 = time.time()
 
         for idx_val in range(len(self.value_functions)):
             # 得到每一个参与方的分数
@@ -53,9 +48,8 @@ class ShapleyValue(Measure):
                 self.contributions[idx_val][i] = self.phi(i, self.value_functions[idx_val])
 
         if "cuda" in str(device):
-            end.record()
             torch.cuda.synchronize()
-            t_cal = (time.process_time() - t0) + start.elapsed_time(end) * 1e-3
-        else:
-            t_cal = time.process_time() - t0
+
+        t_cal = time.time() - t0
+
         return self.contributions.tolist(), t_cal

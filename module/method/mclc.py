@@ -73,12 +73,7 @@ class MC_LeastCore(Measure):
     def get_contributions(self, seed, num_samples, **kwargs):
         device = self.model.device
         # start timing!
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        if "cuda" in str(device):
-            torch.cuda.synchronize()
-            start.record()
-        t0 = time.process_time()
+        t0 = time.time()
 
         self.seed = seed
 
@@ -117,10 +112,8 @@ class MC_LeastCore(Measure):
                 self.contributions[idx_val][i] = ans['x'][i]
 
         if "cuda" in str(device):
-            end.record()
             torch.cuda.synchronize()
-            t_cal = (time.process_time() - t0) + start.elapsed_time(end) * 1e-3
-        else:
-            t_cal = time.process_time() - t0
+
+        t_cal = time.time() - t0
 
         return self.contributions.tolist(), t_cal

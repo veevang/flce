@@ -4,6 +4,7 @@ import pickle
 import itertools
 from matplotlib import pyplot as plt
 import os
+import matplotlib
 import matplotlib.collections
 
 '''
@@ -12,6 +13,12 @@ Please note that, the can only process one kind of data (attack or non-attack) e
 if you want to process one kind of data, please comment out the rest 
 (i.e. the part between "metric plot with attack/non-attack data preprocessing starts" and "ends"). 
 '''
+
+# topic = "metric plot with attack"
+topic = "metric plot with non-attack"
+
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
 
 def search_files_with_keywords(folder_path, keywords):
     matching_files = []
@@ -61,130 +68,133 @@ accuracy_index = 3
 # ----------------- config setting ends ----------------------
 
 # ------------------------- metric plot with non-attack data preprocessing starts --------------------------
-plot_path = f"./figure/exp_result/final/metric_remove_client/"
-filename = f"metric_remove_{point_size_scale}.pdf"
+if topic == "metric plot with non-attack":
+    plot_path = f"./figure/exp_result/final/metric_remove_client/"
+    filename = f"metric_remove_{point_size_scale}.pdf"
 
-data = pd.read_csv('./result/exp_result/final/metric_remove.csv', sep=';')
+    data = pd.read_csv('./result/exp_result/final/metric_remove.csv', sep=';')
 
-x_lo, x_hi = 0, 0.625
-data = data[(data["x"] >= x_lo) & (data["x"] <= x_hi)]
-x_li = data["x"].unique()
-for x in x_li:
-    data.loc[(data["x"] == x), "removed client number"] = round(x * num_parts)
-data["removed client number"] = data["removed client number"].astype(int)
+    x_lo, x_hi = 0, 0.625
+    data = data[(data["x"] >= x_lo) & (data["x"] <= x_hi)]
+    x_li = data["x"].unique()
+    for x in x_li:
+        data.loc[(data["x"] == x), "removed client number"] = round(x * num_parts)
+    data["removed client number"] = data["removed client number"].astype(int)
 
-data = data[data["remove topic"] == "best"]
+    data = data[data["remove topic"] == "best"]
 
-for distribution, (dataset, model) in itertools.product(distributions, zip(datasets, models)):
+    for distribution, (dataset, model) in itertools.product(distributions, zip(datasets, models)):
 
-    folder_path = f"./data/utility_cache/--topic effective --dataset {dataset} --model {model} --num_parts 8/"
+        folder_path = f"./data/utility_cache/--topic effective --dataset {dataset} --model {model} --num_parts 8/"
 
-    parameters = parameters_collection[f"{dataset} {distribution}"]
-    for seed in seeds:
-        searching_keywords = [distribution, f"--alpha {parameters['alpha']}",
-                              f"--batch_size {parameters['batch_size']}", f"--num_epoch {parameters['num_epoch']}",
-                              f"--lr {parameters['lr']}", f"--hidden_layer_size {parameters['hidden_layer_size']}",
-                              f"--seed {seed}", "['f1', 'f1_macro', 'f1_micro', 'accuracy']", ]
-        file_paths = search_files_with_keywords(folder_path, searching_keywords)
-        # print(searching_keywords)
-        # print(file_paths)
-        assert len(file_paths) == 1
-        file_path = file_paths[0]
-        file_path = folder_path + file_path
+        parameters = parameters_collection[f"{dataset} {distribution}"]
+        for seed in seeds:
+            searching_keywords = [distribution, f"--alpha {parameters['alpha']}",
+                                  f"--batch_size {parameters['batch_size']}", f"--num_epoch {parameters['num_epoch']}",
+                                  f"--lr {parameters['lr']}", f"--hidden_layer_size {parameters['hidden_layer_size']}",
+                                  f"--seed {seed}", "['f1', 'f1_macro', 'f1_micro', 'accuracy']", ]
+            file_paths = search_files_with_keywords(folder_path, searching_keywords)
+            # print(searching_keywords)
+            # print(file_paths)
+            assert len(file_paths) == 1
+            file_path = file_paths[0]
+            file_path = folder_path + file_path
 
-        with open(file_path, "rb") as handle:
-            cache = pickle.load(handle)
+            with open(file_path, "rb") as handle:
+                cache = pickle.load(handle)
 
-        for metric in hue_order:
-            if len(data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
-                    data["seed"] == seed) & (
-                                    data["value function"] == metric) & (data["remove topic"] == "best") & (
-                                    data["method"] == "ShapleyValue")]) == 0:
-                continue
-            else:
-                # if distribution dataset metric 有数据，则将y改变成为accuracy
-                retained_set = set(range(num_parts))
-                for removed_client_number in range(round(x_lo * num_parts), round(x_hi * num_parts) + 1):
-                    # 给y重新赋值
-                    data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
-                            data["removed client number"] == removed_client_number) & (data["seed"] == seed) & (
-                                     data["value function"] == metric) & (data["remove topic"] == "best") & (
-                                     data["method"] == "ShapleyValue"), "y"] = cache[str(retained_set)][accuracy_index]
-                    num_removed_client: pd.Series = data.loc[
-                        (data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+            for metric in hue_order:
+                if len(data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+                        data["seed"] == seed) & (
+                                        data["value function"] == metric) & (data["remove topic"] == "best") & (
+                                        data["method"] == "ShapleyValue")]) == 0:
+                    continue
+                else:
+                    # if distribution dataset metric 有数据，则将y改变成为accuracy
+                    retained_set = set(range(num_parts))
+                    for removed_client_number in range(round(x_lo * num_parts), round(x_hi * num_parts) + 1):
+                        # 给y重新赋值
+                        data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
                                 data["removed client number"] == removed_client_number) & (data["seed"] == seed) & (
-                                data["value function"] == metric) & (data["remove topic"] == "best") & (
-                                data["method"] == "ShapleyValue"), "num_removed_client"]
-                    assert len(num_removed_client) == 1
-                    num_removed_client = num_removed_client.tolist()[0]
-                    retained_set.remove(num_removed_client)
-
+                                         data["value function"] == metric) & (data["remove topic"] == "best") & (
+                                         data["method"] == "ShapleyValue"), "y"] = cache[str(retained_set)][accuracy_index]
+                        num_removed_client: pd.Series = data.loc[
+                            (data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+                                    data["removed client number"] == removed_client_number) & (data["seed"] == seed) & (
+                                    data["value function"] == metric) & (data["remove topic"] == "best") & (
+                                    data["method"] == "ShapleyValue"), "num_removed_client"]
+                        assert len(num_removed_client) == 1
+                        num_removed_client = num_removed_client.tolist()[0]
+                        retained_set.remove(num_removed_client)
+    bbox_to_anchor = (0.5, 1.12)
 # ------------------------- metric plot with non-attack data preprocessing ends --------------------------
 
 # ------------------------- metric plot with attack data preprocessing starts --------------------------
-# distribution = "label skew"
-# attack_arg = 0.8
-# plot_path = f"./figure/exp_result/final/metric_remove_client/"
-# num_attack_clients = 2
-# filename = f"metric_remove_robust_setting_{num_attack_clients}_{attack_arg}_label_flip_{point_size_scale}.pdf"
-#
-# data = pd.read_csv(f'result/exp_result/final/metric_remove_client_robust_setting_{num_attack_clients}_{attack_arg}.csv', sep=';')
-#
-# x_lo, x_hi = 0, 0.625
-# data = data[(data["x"] >= x_lo) & (data["x"] <= x_hi)]
-# x_li = data["x"].unique()
-# for x in x_li:
-#     data.loc[(data["x"] == x), "removed client number"] = round(x * num_parts)
-# data["removed client number"] = data["removed client number"].astype(int)
-#
-# data = data[data["remove topic"] == "best"]
-# for attack_method, (dataset, model) in itertools.product(attack_methods, zip(datasets, models)):
-#
-#     folder_path = f"./data/utility_cache/--topic robust --dataset {dataset} --model {model} --num_parts 8/"
-#
-#     parameters = parameters_collection[f"{dataset} {distribution}"]
-#     for seed in seeds:
-#         searching_keywords = [distribution, f"--alpha {parameters['alpha']}",
-#                               f"--batch_size {parameters['batch_size']}", f"--num_epoch {parameters['num_epoch']}",
-#                               f"--lr {parameters['lr']}", f"--hidden_layer_size {parameters['hidden_layer_size']}",
-#                               f"--seed {seed}", f"{attack_method} {num_attack_clients}", f"--attack_arg {attack_arg}",
-#                               "['f1', 'f1_macro', 'f1_micro', 'accuracy']", ]
-#         file_paths = search_files_with_keywords(folder_path, searching_keywords)
-#         # print(file_paths)
-#         assert len(file_paths) == 1
-#         file_path = file_paths[0]
-#         file_path = folder_path + file_path
-#
-#         with open(file_path, "rb") as handle:
-#             cache = pickle.load(handle)
-#
-#         for metric in hue_order:
-#             if len(data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
-#                     data["seed"] == seed) & (
-#                     data["value function"] == metric) & (data["remove topic"] == "best") & (
-#                     data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method)]) == 0:
-#                 continue
-#             else:
-#                 # if distribution dataset metric 有数据，则将y改变成为accuracy
-#                 retained_set = set(range(num_parts))
-#                 for removed_client_number in range(round(x_lo * num_parts), round(x_hi * num_parts) + 1):
-#                     # 给y重新赋值
-#                     data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
-#                     data["seed"] == seed) & (
-#                     data["value function"] == metric) & (data["remove topic"] == "best") & (
-#                     data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method) & (data["removed client number"] == removed_client_number), "y"] = cache[str(retained_set)][accuracy_index]
-#                     num_removed_client: pd.Series = data.loc[
-#                         (data["distribution"] == distribution) & (data["dataset"] == dataset) & (
-#                                 data["seed"] == seed) & (
-#                                 data["value function"] == metric) & (data["remove topic"] == "best") & (
-#                                 data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method)
-#                         & (data["removed client number"] == removed_client_number), "num_removed_client"]
-#                     # print(f"{distribution}{dataset}{seed}{metric}{attack_method}{num_removed_client}")
-#                     assert len(num_removed_client) == 1
-#                     num_removed_client = num_removed_client.tolist()[0]
-#                     retained_set.remove(num_removed_client)
-#
-# data = data[data["attack_method"] == "label flip"]
+if topic == "metric plot with attack":
+    distribution = "label skew"
+    attack_arg = 0.8
+    plot_path = f"./figure/exp_result/final/metric_remove_client/"
+    num_attack_clients = 2
+    filename = f"metric_remove_robust_setting_{num_attack_clients}_{attack_arg}_label_flip_{point_size_scale}.pdf"
+
+    data = pd.read_csv(f'result/exp_result/final/metric_remove_client_robust_setting_{num_attack_clients}_{attack_arg}.csv', sep=';')
+
+    x_lo, x_hi = 0, 0.625
+    data = data[(data["x"] >= x_lo) & (data["x"] <= x_hi)]
+    x_li = data["x"].unique()
+    for x in x_li:
+        data.loc[(data["x"] == x), "removed client number"] = round(x * num_parts)
+    data["removed client number"] = data["removed client number"].astype(int)
+
+    data = data[data["remove topic"] == "best"]
+    for attack_method, (dataset, model) in itertools.product(attack_methods, zip(datasets, models)):
+
+        folder_path = f"./data/utility_cache/--topic robust --dataset {dataset} --model {model} --num_parts 8/"
+
+        parameters = parameters_collection[f"{dataset} {distribution}"]
+        for seed in seeds:
+            searching_keywords = [distribution, f"--alpha {parameters['alpha']}",
+                                  f"--batch_size {parameters['batch_size']}", f"--num_epoch {parameters['num_epoch']}",
+                                  f"--lr {parameters['lr']}", f"--hidden_layer_size {parameters['hidden_layer_size']}",
+                                  f"--seed {seed}", f"{attack_method} {num_attack_clients}", f"--attack_arg {attack_arg}",
+                                  "['f1', 'f1_macro', 'f1_micro', 'accuracy']", ]
+            file_paths = search_files_with_keywords(folder_path, searching_keywords)
+            # print(file_paths)
+            assert len(file_paths) == 1
+            file_path = file_paths[0]
+            file_path = folder_path + file_path
+
+            with open(file_path, "rb") as handle:
+                cache = pickle.load(handle)
+
+            for metric in hue_order:
+                if len(data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+                        data["seed"] == seed) & (
+                        data["value function"] == metric) & (data["remove topic"] == "best") & (
+                        data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method)]) == 0:
+                    continue
+                else:
+                    # if distribution dataset metric 有数据，则将y改变成为accuracy
+                    retained_set = set(range(num_parts))
+                    for removed_client_number in range(round(x_lo * num_parts), round(x_hi * num_parts) + 1):
+                        # 给y重新赋值
+                        data.loc[(data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+                        data["seed"] == seed) & (
+                        data["value function"] == metric) & (data["remove topic"] == "best") & (
+                        data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method) & (data["removed client number"] == removed_client_number), "y"] = cache[str(retained_set)][accuracy_index]
+                        num_removed_client: pd.Series = data.loc[
+                            (data["distribution"] == distribution) & (data["dataset"] == dataset) & (
+                                    data["seed"] == seed) & (
+                                    data["value function"] == metric) & (data["remove topic"] == "best") & (
+                                    data["method"] == "ShapleyValue") & (data["attack_method"] == attack_method)
+                            & (data["removed client number"] == removed_client_number), "num_removed_client"]
+                        # print(f"{distribution}{dataset}{seed}{metric}{attack_method}{num_removed_client}")
+                        assert len(num_removed_client) == 1
+                        num_removed_client = num_removed_client.tolist()[0]
+                        retained_set.remove(num_removed_client)
+
+    data = data[data["attack_method"] == "label flip"]
+    bbox_to_anchor = (0.5, 1.2)
 
 # ------------------------- metric plot with attack data preprocessing ends --------------------------
 
@@ -230,9 +240,7 @@ for axis in axes:
     axis.spines['bottom'].set_visible(True)
     axis.spines['left'].set_visible(True)
 
-# sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.2), ncol=4, title=None, frameon=True,
-#                 borderaxespad=0.)
-sns.move_legend(fig, "upper center", bbox_to_anchor=(0.5, 1.12), ncol=4, title=None, frameon=True,
+sns.move_legend(fig, "upper center", bbox_to_anchor=bbox_to_anchor, ncol=4, title=None, frameon=True,
                 borderaxespad=0.)
 fig.set_titles(row_template="{row_name}", col_template="{col_name}", pad=10)
 fig.set(xlabel="removed clients")

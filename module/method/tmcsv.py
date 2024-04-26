@@ -37,12 +37,7 @@ class TMC_ShapleyValue(Measure):
         """
         device = self.model.device
         # start timing!
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-        if "cuda" in str(device):
-            torch.cuda.synchronize()
-            start.record()
-        t0 = time.process_time()
+        t0 = time.time()
 
         num_parts = len(self.X_train_parts)
 
@@ -86,11 +81,9 @@ class TMC_ShapleyValue(Measure):
         #     pprint(self.contributions[0][0])
 
         if "cuda" in str(device):
-            end.record()
             torch.cuda.synchronize()
-            t_cal = (time.process_time() - t0) + start.elapsed_time(end) * 1e-3
-        else:
-            t_cal = time.process_time() - t0
+
+        t_cal = time.time() - t0
 
         return self.contributions.tolist(), t_cal
 
