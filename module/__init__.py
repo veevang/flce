@@ -1,3 +1,3 @@
-import data_manager
-import method
-import model
+from . import data_manager
+from . import method
+from . import model

@@ -71,7 +71,7 @@ methods=('Individual')
 #
 ##efficient
 seed=6694
-num_repeat=3
+num_repeat=1
 
 # effectiveness & robustness
 #value_functions=("f1" "f1_macro" "f1_micro" "accuracy")
@@ -85,7 +85,7 @@ do
 #  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset adult --model AdultMLP --lr 0.001 --num_epoch 25 --hidden_layer_size 24 --batch_size 64 --device cpu -a 0.365 --distribution "quantity skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/adult quantity skew $method.out" 2>&1 &
 #  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset bank --model BankMLP --lr 0.001 --num_epoch 20 --hidden_layer_size 8 --batch_size 64 --device cpu -a 0.35 --distribution "quantity skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/bank quantity skew $method.out" 2>&1 &
 #  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset dota2 --model Dota2MLP --lr 0.001 --num_epoch 5 --hidden_layer_size 4 --batch_size 128 --device cpu -a 0.4 --distribution "quantity skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/dota2 quantity skew $method.out" 2>&1 &
-#  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset tictactoe --model TicTacToeMLP --lr 0.008 --num_epoch 80 --hidden_layer_size 16 --batch_size 16 --device cpu -a 0.65 --distribution "quantity skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/tictactoe quantity skew $method.out" 2>&1 &
+  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset tictactoe --model TicTacToeMLP --lr 0.008 --num_epoch 80 --hidden_layer_size 16 --batch_size 16 --device 1 -a 0.65 --distribution "quantity skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/tictactoe quantity skew $method.out" 2>&1 &
 
   # effective label
 #  nohup python -u main.py --num_parts 8 -t effective -m $method --dataset adult --model AdultMLP --lr 0.001 --num_epoch 25 --hidden_layer_size 24 --batch_size 64 --device cpu -a 0.8 --distribution "label skew" -s $seed --num_repeat $num_repeat --start_date $today --num_try $sub_folder --value_functions "${value_functions[@]}" > "./result/log/adult label skew $method.out" 2>&1 &

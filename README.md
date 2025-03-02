@@ -22,8 +22,18 @@ The project stems from a paper to appear at VLDB'24 entitled "Contributions Esti
 
 ### Prerequisites
 
-Before you begin, ensure you have met the following requirements:
-- Python 3.9.7 or later
+Before you begin, ensure you have met the following requirements.
+
+Create and a conda environment and activate it using
+```shell
+conda env create -f environment.yml
+conda activate flce
+```
+
+Install pytorch using
+```shell
+conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+```
 
 [//]: # (### Installation)
 
@@ -65,7 +75,15 @@ Before you begin, ensure you have met the following requirements:
 
 [//]: # (```)
 
-For examples, please refer to the "./run.sh" file.
+[//]: # (conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge)
+
+[//]: # (-c conda-forge scikit-learn)
+
+For examples, please refer to the `run.sh` file in the root directory.
+After editing the file, you might use the following code to run the experiments:
+```shell
+bash run.sh
+```
 
 [//]: # (## Contributing)
 
