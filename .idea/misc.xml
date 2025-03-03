@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Black">
-    <option name="executionMode" value="BINARY" />
-    <option name="pathToExecutable" value="D:\anaconda3\Scripts\black.exe" />
-    <option name="sdkName" value="flce_fix" />
-  </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="flce_fix" project-jdk-type="Python SDK" />
-</project>
